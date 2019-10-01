@@ -1,0 +1,393 @@
+---
+title: "Viz_and_Eda 2"
+author: "Dionna Attinson"
+date: "9/26/2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggridges)
+``` 
+
+## create the weather data
+```{r load_data, cache = TRUE}
+weather_df = 
+  rnoaa:: meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+weather_df
+```
+
+## create a ggplot
+
+```{r}
+ggplot(weather_df, aes(x= tmin, y= tmax)) +
+  geom_point()
+```
+
+alternate way of making this plot 
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x= tmin, y = tmax)) +
+  geom_point()
+```
+
+saving initial plots 
+
+```{r} 
+weather_df %>% filter(name == "CentralPark_NY")
+```
+
+```{r}
+scatterplot= 
+  weather_df %>% 
+  ggplot(aes(x= tmin, y= tmax)) +
+  geom_point()
+
+scatterplot
+```
+
+adding color...
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x= tmin, y= tmax)) +
+    geom_point(aes(color=name), alpha = .4)
+```
+
+vs
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmin, y= tmax, color = name)) + 
+    geom_point(aes(color=name), alpha = .5) + 
+    geom_smooth(se=FALSE)
+```
+
+facet!
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+this is fine but not interesting 
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point(aes(size=prcp), alpha = .5) +
+  geom_smooth(size = 2, se = FALSE)
+```
+
+## Some extra stuff
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_smooth(size = 2, se = FALSE)
+```
+
+2d density
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_bin2d() 
+```
+
+## More kinds of plots!! 
+
+Understand the distribution of a single variable 
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram()
+```
+
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram(position = "dodge")
+```
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram(position = "dodge") +
+    facet_grid(~name)
+```
+
+## A Density Plot 
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_density(alpha = .3) 
+```
+
+## A Box Plot
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_violin()
+```
+
+Ridge plots!!
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x= tmax, y= name)) + 
+  geom_density_ridges()
+```
+
+
+##saving a plot 
+
+```{r} 
+ggp_ridge_temp = 
+  weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) + 
+  geom_density_ridges()
+
+ggsave("ggplot_temp_ridge.pdf", ggp_ridge_temp)
+```
+
+```{r, fig.width = 6}
+weather_df %>% 
+    ggplot(aes(x = tmin, y = tmax, color = name)) +
+    geom_point(alpha = .4) + 
+    geom_smooth(se = FALSE)
+```
+
+```{r, fig.width = 12}
+weather_df %>% 
+    ggplot(aes(x = tmin, y = tmax, color = name)) +
+    geom_point(alpha = .4) + 
+    geom_smooth(se = FALSE)
+```
+---
+title: "Viz_and_Eda"
+author: "Dionna Attinson"
+date: "9/26/2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggridges)
+``` 
+
+## create the weather data
+```{r load_data, cache = TRUE}
+weather_df = 
+  rnoaa:: meteo_pull_monitors(c("USW00094728", "USC00519397", "USS0023B17S"),
+                      var = c("PRCP", "TMIN", "TMAX"), 
+                      date_min = "2017-01-01",
+                      date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(id, USW00094728 = "CentralPark_NY", 
+                      USC00519397 = "Waikiki_HA",
+                      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+weather_df
+```
+
+## create a ggplot
+
+```{r}
+ggplot(weather_df, aes(x= tmin, y= tmax)) +
+  geom_point()
+```
+
+alternate way of making this plot 
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x= tmin, y = tmax)) +
+  geom_point()
+```
+
+saving initial plots 
+
+```{r} 
+weather_df %>% filter(name == "CentralPark_NY")
+```
+
+```{r}
+scatterplot= 
+  weather_df %>% 
+  ggplot(aes(x= tmin, y= tmax)) +
+  geom_point()
+
+scatterplot
+```
+
+adding color...
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x= tmin, y= tmax)) +
+    geom_point(aes(color=name), alpha = .4)
+```
+
+vs
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmin, y= tmax, color = name)) + 
+    geom_point(aes(color=name), alpha = .5) + 
+    geom_smooth(se=FALSE)
+```
+
+facet!
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+this is fine but not interesting 
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point(aes(size=prcp), alpha = .5) +
+  geom_smooth(size = 2, se = FALSE)
+```
+
+## Some extra stuff
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_smooth(size = 2, se = FALSE)
+```
+
+2d density
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_bin2d() 
+```
+
+## More kinds of plots!! 
+
+Understand the distribution of a single variable 
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram()
+```
+
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram(position = "dodge")
+```
+
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_histogram(position = "dodge") +
+    facet_grid(~name)
+```
+
+## A Density Plot 
+```{r}
+weather_df %>% 
+    ggplot(aes(x = tmax, fill = name)) +
+    geom_density(alpha = .3) 
+```
+
+## A Box Plot
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_violin()
+```
+
+Ridge plots!!
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x= tmax, y= name)) + 
+  geom_density_ridges()
+```
+
+
+##saving a plot 
+
+```{r} 
+ggp_ridge_temp = 
+  weather_df %>% 
+  ggplot(aes(x = tmax, y = name)) + 
+  geom_density_ridges()
+
+ggsave("ggplot_temp_ridge.pdf", ggp_ridge_temp)
+```
+
+```{r, fig.width = 6}
+weather_df %>% 
+    ggplot(aes(x = tmin, y = tmax, color = name)) +
+    geom_point(alpha = .4) + 
+    geom_smooth(se = FALSE)
+```
+
+```{r, fig.width = 12}
+weather_df %>% 
+    ggplot(aes(x = tmin, y = tmax, color = name)) +
+    geom_point(alpha = .4) + 
+    geom_smooth(se = FALSE)
+```
+
+
+```{r}
+weather_df %>% 
+  ggplot(aes(x=tmin, y=tmax, color=name)) +
+  geom_point(alpha = .5) +
+  labs(
+      title = "temperature plot",
+      x = "minimum temp (c)",
+      y = "maximum temp (c)", 
+      caption = "Data from NOAA via rnoaa package"
+  ) + 
+  scale_x_continuous(
+    breaks = c(-15, 0, 15), 
+    labels = c("-15º C", "0", "15")
+  ) +
+  scale_y_continuous(
+    trans = "sqrt", 
+    position = "right")
+```
+
